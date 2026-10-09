@@ -12,4 +12,4 @@ Persistent light/dark theme, responsive navigation, map pan/zoom/reset, career p
 
 The education panel uses the documented Cognizant Learning Academy background. The paired practice panel uses professional expertise from the original portfolio; no degree or spoken language proficiency was invented.
 
-Deploy the static files to GitHub Pages from `main` at the repository root. `.nojekyll` prevents Jekyll processing. `portfolio-download/` and `screenshots/` are local reference material and are not part of the deployed site. Fonts are bundled with licenses. The cartoon portrait, pirate mascot, and watercolor map are original generated illustrations.
+Deploy the static files to GitHub Pages from `main` at the repository root. `.nojekyll` prevents Jekyll processing. `portfolio-download/` and `screenshots/` are local reference material and are not part of the deployed site. Fonts are bundled with licenses. The hero uses the user-supplied illustrated portrait, reframed for the portrait panel. The pirate mascot and watercolor map are original generated illustrations.
