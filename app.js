@@ -5,7 +5,7 @@ function setTheme(value) {
   document.body.classList.toggle('dark', value === 'dark');
   themeButton.textContent = value === 'dark' ? '☀' : '☾';
   themeButton.setAttribute('aria-label', `Switch to ${value === 'dark' ? 'light' : 'dark'} theme`);
-  document.querySelector('meta[name="theme-color"]').content = value === 'dark' ? '#24282c' : '#ffe34d';
+  document.querySelector('meta[name="theme-color"]').content = value === 'dark' ? '#262626' : '#ffe44d';
 }
 setTheme(theme);
 themeButton.addEventListener('click', () => {
@@ -13,6 +13,7 @@ themeButton.addEventListener('click', () => {
   setTheme(theme);
   try { localStorage.setItem('portfolio-theme', theme); } catch {}
 });
+window.addEventListener('load', () => setTimeout(() => document.querySelector('.loader').classList.add('hidden'), 600));
 const menu = document.querySelector('.menu-toggle');
 const navigation = document.querySelector('#navigation');
 function closeMenu() { navigation.classList.remove('open'); menu.setAttribute('aria-expanded', 'false'); }
@@ -23,42 +24,66 @@ menu.addEventListener('click', () => {
 navigation.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
 document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
 const chapters = [
-  { tag: 'CHAPTER 03', title: 'From architecture to impact.', description: 'At Anvesa, I design RAG pipelines, Agentic AI workflows, and Azure AKS systems that run in production every day.' },
-  { tag: 'CHAPTER 02', title: 'A founding engineer’s story.', description: 'Seven years building Anvesa from the ground up. From full-stack engineering to leading architecture, R&D, QA, and production support through the Happiest Minds acquisition.' },
-  { tag: 'CHAPTER 01', title: 'Where the journey began.', description: 'Batch Topper at Cognizant’s Learning Academy. Working on the American Express Global Decision Engine taught me to deliver reliable .NET systems across US, EMEA, and APAC markets.' }
+  {title:'Head of Technology · Anvesa', description:'Production RAG pipelines, Agentic AI workflows, and cloud-native systems on Azure AKS. Serving 15+ enterprise clients across the US, India, and Australia.'},
+  {title:'Aureus → Happiest Minds', description:'Founding engineer on Anvesa. Grew from full-stack engineering to leading architecture, R&D, QA, and production support through the acquisition.'},
+  {title:'Cognizant · American Express', description:'Mainframe-to-.NET migration for the Global Decision Engine. Delivery across US, EMEA, and APAC markets, recognized for quality.'}
 ];
-document.querySelectorAll('.career-card').forEach(card => {
-  card.addEventListener('click', () => {
-    document.querySelectorAll('.career-card').forEach(item => {
-      item.classList.toggle('active', item === card);
-      item.setAttribute('aria-pressed', String(item === card));
-    });
-    const chapter = chapters[Number(card.dataset.career)];
-    document.querySelector('.map-detail .tag').textContent = chapter.tag;
-    document.querySelector('#chapter-title').textContent = chapter.title;
-    document.querySelector('#chapter-description').textContent = chapter.description;
+const popup = document.querySelector('.map-popup');
+function showChapter(index) {
+  document.querySelectorAll('.career-card').forEach((card, i) => {
+    card.classList.toggle('active', i === index);
+    card.setAttribute('aria-pressed', String(i === index));
   });
+  document.querySelector('#chapter-title').textContent = chapters[index].title;
+  document.querySelector('#chapter-description').textContent = chapters[index].description;
+  popup.hidden = false;
+}
+document.querySelectorAll('.career-card').forEach(card => card.addEventListener('click', () => showChapter(Number(card.dataset.career))));
+document.querySelector('.popup-close').addEventListener('click', () => { popup.hidden = true; });
+let mapZoom = 1;
+document.querySelectorAll('[data-zoom]').forEach(button => button.addEventListener('click', () => {
+  if (button.dataset.zoom === 'reset') { mapZoom = 1; popup.hidden = true; }
+  else mapZoom = Math.max(1, Math.min(2.5, mapZoom + (button.dataset.zoom === 'in' ? .3 : -.3)));
+  document.querySelector('.map-canvas').style.transform = `scale(${mapZoom})`;
+}));
+document.querySelectorAll('.map-pin').forEach(pin => {
+  pin.setAttribute('role', 'button');pin.setAttribute('tabindex', '0');
+  pin.setAttribute('aria-label', `Client reach: ${pin.querySelector('span').textContent}`);
+  pin.addEventListener('click', () => showChapter(0));
+  pin.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault();showChapter(0); } });
 });
-document.querySelector('.contact-form').addEventListener('submit', event => {
+const dialog = document.querySelector('#terminal-dialog');
+const output = document.querySelector('.terminal-output');
+const commandInput = document.querySelector('#terminal-input');
+document.querySelector('#open-terminal').addEventListener('click', () => { dialog.showModal();commandInput.focus(); });
+document.querySelector('#close-terminal').addEventListener('click', () => dialog.close());
+document.querySelector('.terminal-form').addEventListener('submit', event => {
   event.preventDefault();
-  const data = new FormData(event.currentTarget);
-  const subject = `Portfolio inquiry from ${data.get('name')}`;
-  const body = `Hi Ashok,\n\n${data.get('message')}\n\nFrom: ${data.get('name')}\nEmail: ${data.get('email')}${data.get('company') ? `\nCompany: ${data.get('company')}` : ''}`;
-  const emailUrl = `mailto:ashok@ashokkunchala.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  const status = document.querySelector('#form-status');
-  status.textContent = 'Your email draft is ready. ';
-  const draftLink = document.createElement('a');
-  draftLink.href = emailUrl;
-  draftLink.textContent = 'Open your email app to send it →';
-  draftLink.className = 'draft-link';
-  status.append(draftLink);
+  const command = commandInput.value.trim().toLowerCase();
+  commandInput.value = '';
+  const replies = {help:'Commands: about, work, skills, contact, theme, clear, exit',about:'Ashok Kunchala — Head of Technology at Anvesa. Enterprise AI architect. 13+ years building production systems.',work:'Anvesa: AI-native eDiscovery. 15+ enterprise clients across the US, India, and Australia.',skills:'Agentic AI · RAG · Azure · .NET Core · Angular · SQL Server · Kubernetes',contact:'Email: ashok@ashokkunchala.com\nLinkedIn: linkedin.com/in/ashok-kumar-kunchala'};
+  if (command === 'exit') { dialog.close();return; }
+  if (command === 'clear') { output.textContent = '';return; }
+  if (command === 'theme') themeButton.click();
+  output.textContent += `\n\n$ ${command}\n${command === 'theme' ? 'Theme switched.' : replies[command] || 'Unknown command. Type help.'}`;
+  output.scrollTop = output.scrollHeight;
 });
 document.querySelector('#year').textContent = new Date().getFullYear();
-let mapZoom = 1;
-document.querySelectorAll('[data-zoom]').forEach(button => {
-  button.addEventListener('click', () => {
-    if (button.dataset.zoom === 'reset') mapZoom = 1;
-    else mapZoom = Math.max(1, Math.min(2.5, mapZoom + (button.dataset.zoom === 'in' ? .3 : -.3)));
-    document.querySelector('.map-canvas').style.transform = `scale(${mapZoom})`;
-  });
+const mapCanvas = document.querySelector('.map-canvas');
+let mapPanX = 0, mapPanY = 0, dragStart = null;
+function updateMapTransform() { mapCanvas.style.transform = `translate(${mapPanX}px, ${mapPanY}px) scale(${mapZoom})`; }
+mapCanvas.addEventListener('pointerdown', event => {
+  if (event.target.closest('.map-pin')) return;
+  dragStart = {x:event.clientX-mapPanX, y:event.clientY-mapPanY};
+  mapCanvas.setPointerCapture(event.pointerId);mapCanvas.classList.add('dragging');
 });
+mapCanvas.addEventListener('pointermove', event => {
+  if (!dragStart) return;
+  const limitX = mapCanvas.clientWidth * .3, limitY = mapCanvas.clientHeight * .3;
+  mapPanX = Math.max(-limitX, Math.min(limitX, event.clientX-dragStart.x));
+  mapPanY = Math.max(-limitY, Math.min(limitY, event.clientY-dragStart.y));
+  updateMapTransform();
+});
+function endMapDrag() { dragStart = null; mapCanvas.classList.remove('dragging'); }
+mapCanvas.addEventListener('pointerup', endMapDrag);mapCanvas.addEventListener('pointercancel', endMapDrag);
+document.querySelector('[data-zoom="reset"]').addEventListener('click', () => { mapPanX=0;mapPanY=0;updateMapTransform(); });
