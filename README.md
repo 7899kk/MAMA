@@ -8,7 +8,7 @@ From `/workspace/MAMA`, run `npm run dev`. Node and Python 3 are required. Port:
 
 ## Behavior
 
-Persistent light/dark theme, responsive navigation, map pan/zoom/reset, career popups, and a keyboard-accessible terminal with help, about, work, skills, contact, theme, clear, and exit commands. Contact links use LinkedIn, email, and the GitHub project.
+Persistent light/dark theme, responsive navigation, map pan/zoom/reset, career popups, and a keyboard-accessible terminal with help, about, work, skills, contact, theme, clear, and exit commands. Contact links use the verified LinkedIn profile and email address, with Journal and Anvesa details opening in local dialogs. Navigation does not redirect to the original website.
 
 The education panel uses the documented Cognizant Learning Academy background. The paired practice panel uses professional expertise from the original portfolio; no degree or spoken language proficiency was invented.
 

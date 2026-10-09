@@ -87,3 +87,16 @@ mapCanvas.addEventListener('pointermove', event => {
 function endMapDrag() { dragStart = null; mapCanvas.classList.remove('dragging'); }
 mapCanvas.addEventListener('pointerup', endMapDrag);mapCanvas.addEventListener('pointercancel', endMapDrag);
 document.querySelector('[data-zoom="reset"]').addEventListener('click', () => { mapPanX=0;mapPanY=0;updateMapTransform(); });
+const journalDialog = document.querySelector('#journal-dialog');
+const projectDialog = document.querySelector('#project-dialog');
+document.querySelectorAll('[data-open-journal]').forEach(link => link.addEventListener('click', event => {
+  event.preventDefault();closeMenu();journalDialog.showModal();
+}));
+document.querySelectorAll('[data-open-project]').forEach(link => link.addEventListener('click', event => {
+  event.preventDefault();projectDialog.showModal();
+}));
+document.querySelectorAll('[data-close-dialog]').forEach(button => button.addEventListener('click', () => button.closest('dialog').close()));
+document.querySelectorAll('.content-dialog').forEach(dialog => dialog.addEventListener('click', event => {
+  const bounds = dialog.getBoundingClientRect();
+  if (event.target === dialog && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) dialog.close();
+}));
