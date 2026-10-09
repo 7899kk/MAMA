@@ -13,7 +13,7 @@ themeButton.addEventListener('click', () => {
   setTheme(theme);
   try { localStorage.setItem('portfolio-theme', theme); } catch {}
 });
-window.addEventListener('load', () => setTimeout(() => document.querySelector('.loader').classList.add('hidden'), 600));
+document.querySelector('.loader').classList.add('hidden');
 const menu = document.querySelector('.menu-toggle');
 const navigation = document.querySelector('#navigation');
 function closeMenu() { navigation.classList.remove('open'); menu.setAttribute('aria-expanded', 'false'); }
@@ -61,7 +61,7 @@ document.querySelector('.terminal-form').addEventListener('submit', event => {
   event.preventDefault();
   const command = commandInput.value.trim().toLowerCase();
   commandInput.value = '';
-  const replies = {help:'Commands: about, work, skills, contact, theme, clear, exit',about:'Ashok Kunchala — Head of Technology at Anvesa. Enterprise AI architect. 13+ years building production systems.',work:'Anvesa: AI-native eDiscovery. 15+ enterprise clients across the US, India, and Australia.',skills:'Agentic AI · RAG · Azure · .NET Core · Angular · SQL Server · Kubernetes',contact:'Email: ashok@ashokkunchala.com\nLinkedIn: linkedin.com/in/ashok-kumar-kunchala'};
+  const replies = {help:'Commands: about, work, skills, contact, theme, clear, exit',about:'Ashok Kunchala — Head of Technology at Anvesa. Enterprise AI architect. 13+ years building production systems.',work:'Anvesa: AI-native eDiscovery. 15+ enterprise clients across the US, India, and Australia.',skills:'Agentic AI · RAG · Azure · .NET Core · Angular · SQL Server · Kubernetes',contact:'Use the Email contact card to open the contact form.\nLinkedIn: linkedin.com/in/ashok-kumar-kunchala'};
   if (command === 'exit') { dialog.close();return; }
   if (command === 'clear') { output.textContent = '';return; }
   if (command === 'theme') themeButton.click();
@@ -100,3 +100,40 @@ document.querySelectorAll('.content-dialog').forEach(dialog => dialog.addEventLi
   const bounds = dialog.getBoundingClientRect();
   if (event.target === dialog && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) dialog.close();
 }));
+const contactDialog = document.querySelector('#contact-dialog');
+const contactForm = document.querySelector('#contact-form');
+const contactStatus = document.querySelector('#contact-status');
+const contactSubmit = contactForm.querySelector('button[type="submit"]');
+let contactServiceChecked = false;
+async function checkContactService() {
+  if (contactServiceChecked) return;
+  contactServiceChecked = true;
+  try {
+    const response = await fetch('api/contact', {headers: {Accept: 'application/json'}, signal: AbortSignal.timeout(5000)});
+    if (!response.ok) throw new Error('Unavailable');
+    const service = await response.json();
+    if (!service.configured) throw new Error('Unavailable');
+  } catch {
+    contactStatus.textContent = 'The contact form is temporarily unavailable. You can connect with me on LinkedIn.';
+  }
+}
+document.querySelectorAll('[data-open-contact]').forEach(link => link.addEventListener('click', event => {
+  event.preventDefault();closeMenu();contactDialog.showModal();checkContactService();
+}));
+contactForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!contactForm.reportValidity()) return;
+  contactSubmit.disabled = true;contactSubmit.textContent = 'Sending…';contactStatus.textContent = '';
+  try {
+    const response = await fetch('api/contact', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(Object.fromEntries(new FormData(contactForm))), signal: AbortSignal.timeout(25000)
+    });
+    let result;
+    try {result = await response.json();} catch {throw new Error('The contact form is temporarily unavailable. Please connect on LinkedIn.');}
+    if (!response.ok || result.ok !== true) throw new Error(result.error || 'Your message could not be sent. Please try again.');
+    contactStatus.textContent = result.message;contactForm.reset();
+  } catch (error) {
+    contactStatus.textContent = error.name === 'TimeoutError' ? 'Sending timed out. Please try again later.' : error.message;
+  } finally {contactSubmit.disabled = false;contactSubmit.textContent = 'Send message';}
+});

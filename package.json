@@ -1,11 +1,12 @@
 {
   "name": "ashok-portfolio",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "Video-inspired portfolio for Ashok Kumar Kunchala",
+  "engines": {"node": ">=24"},
   "scripts": {
-    "dev": "python3 -m http.server 3000 --bind 0.0.0.0",
-    "start": "python3 -m http.server 3000 --bind 0.0.0.0",
-    "check": "node --check app.js"
+    "dev": "node --use-env-proxy --env-file-if-exists=.env server.mjs",
+    "start": "node --use-env-proxy --env-file-if-exists=.env server.mjs",
+    "check": "node --check app.js && node --check server.mjs && node --check lib/contact.mjs && node --check api/contact.mjs",
+    "test": "node --test tests/contact.test.mjs"
   }
 }

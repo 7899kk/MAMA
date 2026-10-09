@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {"src": "api/contact.mjs", "use": "@vercel/node"},
+    {"src": "index.html", "use": "@vercel/static"},
+    {"src": "app.js", "use": "@vercel/static"},
+    {"src": "style.css", "use": "@vercel/static"},
+    {"src": "assets/**", "use": "@vercel/static"}
+  ],
+  "routes": [
+    {"src": "/api/contact", "dest": "/api/contact.mjs"},
+    {"handle": "filesystem"},
+    {"src": "/", "dest": "/index.html"}
+  ]
+}
